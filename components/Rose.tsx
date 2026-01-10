@@ -296,18 +296,30 @@ const TrackingBeam: React.FC<{
 const ConstructionZone: React.FC<{ growthRef?: React.MutableRefObject<number> }> = ({ growthRef }) => {
   const boxSize = 12.5;
   // Laser Emitters at top corners
-  const corners = useMemo(() => [
+  const topCorners = useMemo(() => [
       new THREE.Vector3(boxSize, boxSize, boxSize),
       new THREE.Vector3(-boxSize, boxSize, boxSize),
       new THREE.Vector3(-boxSize, boxSize, -boxSize),
       new THREE.Vector3(boxSize, boxSize, -boxSize)
   ], []);
 
+  // Laser Emitters at bottom corners
+  const bottomCorners = useMemo(() => [
+      new THREE.Vector3(boxSize, -boxSize, boxSize),
+      new THREE.Vector3(-boxSize, -boxSize, boxSize),
+      new THREE.Vector3(-boxSize, -boxSize, -boxSize),
+      new THREE.Vector3(boxSize, -boxSize, -boxSize)
+  ], []);
+
   return (
     <group>
-       {/* Dynamic Beams */}
-       {corners.map((corner, i) => (
-           <TrackingBeam key={i} start={corner} growthRef={growthRef} />
+       {/* Dynamic Beams from top corners */}
+       {topCorners.map((corner, i) => (
+           <TrackingBeam key={`top-${i}`} start={corner} growthRef={growthRef} />
+       ))}
+       {/* Dynamic Beams from bottom corners */}
+       {bottomCorners.map((corner, i) => (
+           <TrackingBeam key={`bottom-${i}`} start={corner} growthRef={growthRef} />
        ))}
     </group>
   );
