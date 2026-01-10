@@ -1,0 +1,7 @@
+{
+  "name": "Procedural Particle Tulip",
+  "description": "A highly detailed 3D purple tulip with long vertical leaves, composed of hundreds of thousands of particles. Cinematic, automated visualization.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
