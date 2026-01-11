@@ -280,7 +280,7 @@ const App: React.FC = () => {
       {/* Main Title Overlay */}
       <div className="absolute top-8 left-8 z-10 pointer-events-none select-none">
         <h1 className="text-4xl font-light tracking-[0.2em] text-white/90 drop-shadow-lg">
-          DIGITAL FLORA
+       
         </h1>
         <div className="flex items-center gap-3 mt-2">
             <div className={`h-[1px] transition-all duration-300 ${isPinching ? 'w-24 bg-pink-500 shadow-[0_0_15px_#ec4899]' : 'w-12 bg-cyan-500'}`}></div>
