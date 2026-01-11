@@ -80,22 +80,29 @@ const vertexShader = `
       
       // === DISTORTION EFFECT (Pinch In Gesture) ===
       if (uDistortion > 0.01) {
-        // Spiral twist distortion - affects whole flower
-        float distortAngle = uDistortion * 3.14159 * 2.0 * (1.0 + aRandom * 0.5);
+        // Intense spiral twist distortion
+        float distortAngle = uDistortion * 3.14159 * 4.0 * (1.0 + aRandom * 1.5);
         float distortRadius = length(pos.xz);
         float originalAngle = atan(pos.z, pos.x);
-        float newAngle = originalAngle + distortAngle * (1.0 - pos.y * 0.2);
+        float newAngle = originalAngle + distortAngle * (1.0 - pos.y * 0.3);
         
-        // Expand outward and twist
-        float expansion = 1.0 + uDistortion * 1.5 * aRandom;
+        // Strong expansion outward with random scatter
+        float expansion = 1.0 + uDistortion * 3.0 * aRandom;
         pos.x = cos(newAngle) * distortRadius * expansion;
         pos.z = sin(newAngle) * distortRadius * expansion;
         
-        // Vertical squash and scatter
-        pos.y = pos.y * (1.0 - uDistortion * 0.4) + sin(aRandom * 20.0 + uTime) * uDistortion * 0.5;
+        // Violent vertical scatter and explosion
+        float verticalChaos = sin(aRandom * 50.0 + uTime * 5.0) * uDistortion * 2.0;
+        pos.y = pos.y * (1.0 - uDistortion * 0.6) + verticalChaos;
         
-        // Add chaotic displacement
-        pos += normal * uDistortion * sin(uTime * 3.0 + aRandom * 10.0) * 0.3;
+        // Wild chaotic displacement in all directions
+        float chaos1 = sin(uTime * 8.0 + aRandom * 30.0) * uDistortion * 0.8;
+        float chaos2 = cos(uTime * 6.0 + aRandom * 25.0) * uDistortion * 0.8;
+        float chaos3 = sin(uTime * 7.0 + aRandom * 35.0) * uDistortion * 0.8;
+        pos += vec3(chaos1, chaos2, chaos3);
+        
+        // Particle explosion outward
+        pos += normal * uDistortion * (0.5 + aRandom * 1.5);
       }
     } else {
       // === STEM & LEAVES ===
@@ -111,13 +118,19 @@ const vertexShader = `
       
       // === STEM/LEAF DISTORTION ===
       if (uDistortion > 0.01) {
-        float stemDistort = uDistortion * (1.0 + bendFactor);
-        pos.x += sin(pos.y * 2.0 + uTime * 2.0) * stemDistort * 0.5;
-        pos.z += cos(pos.y * 2.0 + uTime * 2.0 + aRandom * 3.14) * stemDistort * 0.5;
+        float stemDistort = uDistortion * (1.0 + bendFactor) * 2.0;
+        pos.x += sin(pos.y * 4.0 + uTime * 5.0) * stemDistort * 1.2;
+        pos.z += cos(pos.y * 4.0 + uTime * 5.0 + aRandom * 6.28) * stemDistort * 1.2;
         
-        // Scatter leaves more
+        // Wild vertical wave
+        pos.y += sin(uTime * 6.0 + aRandom * 20.0) * uDistortion * 0.5;
+        
+        // Explosive leaf scatter
         if (aType > 1.5) {
-          pos += aDirection * uDistortion * 0.8;
+          pos += aDirection * uDistortion * 2.5 * (0.5 + aRandom);
+          // Random jitter
+          pos.x += sin(uTime * 10.0 + aRandom * 40.0) * uDistortion * 0.4;
+          pos.z += cos(uTime * 10.0 + aRandom * 40.0) * uDistortion * 0.4;
         }
       }
     }
@@ -231,11 +244,20 @@ const fragmentShader = `
     
     // === DISTORTION GLOW EFFECT ===
     if (uDistortion > 0.01) {
-      // Add ethereal glow during distortion
-      vec3 distortGlow = vec3(0.8, 0.4, 1.0) * uDistortion * 2.0;
+      // Intense multi-color glitch glow
+      float glitchFlicker = sin(vRandom * 100.0 + vPosition.x * 10.0) * 0.5 + 0.5;
+      vec3 glowColor1 = vec3(1.0, 0.2, 0.8); // Hot pink
+      vec3 glowColor2 = vec3(0.2, 1.0, 1.0); // Cyan
+      vec3 glowColor3 = vec3(1.0, 0.8, 0.0); // Gold
+      
+      vec3 distortGlow = mix(glowColor1, glowColor2, glitchFlicker) * uDistortion * 3.0;
+      distortGlow += glowColor3 * sin(vRandom * 50.0) * uDistortion * 1.5;
+      
       finalColor += distortGlow;
-      // Increase transparency slightly for ghostly effect
-      alpha *= (1.0 - uDistortion * 0.3);
+      
+      // Flickering alpha for glitch effect
+      float alphaFlicker = 0.7 + 0.3 * sin(vRandom * 80.0 + vPosition.y * 5.0);
+      alpha *= alphaFlicker;
     }
 
     alpha = pow(alpha, 1.5);
