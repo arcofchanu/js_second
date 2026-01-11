@@ -1,5 +1,5 @@
-import React, { Suspense, useRef, useMemo } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import React, { Suspense, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Edges } from '@react-three/drei';
 import * as THREE from 'three';
 import { Rose } from './Rose';
@@ -8,7 +8,7 @@ import { RoseConfig } from '../types';
 interface RoseExperienceProps {
   config: RoseConfig;
   growthRef?: React.MutableRefObject<number>;
-  distortionRef?: React.MutableRefObject<{ x: number, y: number, active: boolean }>;
+  distortionRef?: React.MutableRefObject<number>;
 }
 
 // Camera Controller component to handle target tracking
@@ -51,50 +51,7 @@ const CameraController: React.FC<{
   );
 };
 
-// Handles converting 2D Hand coords to 3D World position
-const InteractionHandler: React.FC<{
-    distortionRef?: React.MutableRefObject<{ x: number, y: number, active: boolean }>;
-    onUpdateCursor: (pos: THREE.Vector3, active: boolean) => void;
-}> = ({ distortionRef, onUpdateCursor }) => {
-    const { camera, raycaster } = useThree();
-    const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), []); // Plane at Z=0
-    const planeIntersect = new THREE.Vector3();
-
-    useFrame(() => {
-        if (distortionRef && distortionRef.current) {
-            const { x, y, active } = distortionRef.current;
-            
-            if (active) {
-                // Raycast from camera using NDC coordinates
-                raycaster.setFromCamera({ x, y }, camera);
-                raycaster.ray.intersectPlane(plane, planeIntersect);
-                onUpdateCursor(planeIntersect, active);
-            } else {
-                onUpdateCursor(planeIntersect, false);
-            }
-        }
-    });
-    return null;
-}
-
 export const RoseExperience: React.FC<RoseExperienceProps> = ({ config, growthRef, distortionRef }) => {
-  const distortPosRef = useRef(new THREE.Vector3(0,0,0));
-  const distortActiveRef = useRef(false);
-  
-  // Visual Cursor Ref
-  const cursorMeshRef = useRef<THREE.Mesh>(null);
-
-  const handleCursorUpdate = (pos: THREE.Vector3, active: boolean) => {
-      distortPosRef.current.copy(pos);
-      distortActiveRef.current = active;
-      
-      if (cursorMeshRef.current) {
-          cursorMeshRef.current.position.copy(pos);
-          cursorMeshRef.current.visible = active;
-          const scale = active ? 1 : 0;
-          cursorMeshRef.current.scale.setScalar(scale);
-      }
-  };
 
   return (
     <Canvas
@@ -140,16 +97,9 @@ export const RoseExperience: React.FC<RoseExperienceProps> = ({ config, growthRe
         <Rose 
             config={config} 
             growthRef={growthRef} 
-            distortPosRef={distortPosRef} 
-            distortActiveRef={distortActiveRef} 
+            distortionRef={distortionRef} 
         />
       </group>
-
-      {/* Visual Cursor for Distortion - Smaller */}
-      <mesh ref={cursorMeshRef} visible={false}>
-          <sphereGeometry args={[0.1, 16, 16]} />
-          <meshBasicMaterial color="#facc15" transparent opacity={0.8} />
-      </mesh>
 
       {/* Shadows on the floor */}
       <ContactShadows 
@@ -162,7 +112,6 @@ export const RoseExperience: React.FC<RoseExperienceProps> = ({ config, growthRe
         color="#000000" 
       />
 
-      <InteractionHandler distortionRef={distortionRef} onUpdateCursor={handleCursorUpdate} />
       <CameraController growthRef={growthRef} />
     </Canvas>
   );
