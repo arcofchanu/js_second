@@ -6,6 +6,7 @@ import { RoseConfig } from '../types';
 interface RoseProps {
   config: RoseConfig;
   growthRef?: React.MutableRefObject<number>;
+  distortionRef?: React.MutableRefObject<number>;
 }
 
 // --- Shader Definitions ---
@@ -27,6 +28,7 @@ const vertexShader = `
   uniform float uOpenness;
   uniform float uDetail;
   uniform float uParticleSize;
+  uniform float uDistortion; // 0.0 = normal, 1.0 = fully distorted
   
   // uScanY controls the vertical construction plane.
   // Values: Top (+10.0) -> Bottom (-12.0)
@@ -75,6 +77,26 @@ const vertexShader = `
       vec3 normal = normalize(vec3(pos.x, pos.y * 0.5, pos.z)); 
       pos = pos + normal * disp;
       pos.x += sin(uTime * 0.3) * 0.1;
+      
+      // === DISTORTION EFFECT (Pinch In Gesture) ===
+      if (uDistortion > 0.01) {
+        // Spiral twist distortion - affects whole flower
+        float distortAngle = uDistortion * 3.14159 * 2.0 * (1.0 + aRandom * 0.5);
+        float distortRadius = length(pos.xz);
+        float originalAngle = atan(pos.z, pos.x);
+        float newAngle = originalAngle + distortAngle * (1.0 - pos.y * 0.2);
+        
+        // Expand outward and twist
+        float expansion = 1.0 + uDistortion * 1.5 * aRandom;
+        pos.x = cos(newAngle) * distortRadius * expansion;
+        pos.z = sin(newAngle) * distortRadius * expansion;
+        
+        // Vertical squash and scatter
+        pos.y = pos.y * (1.0 - uDistortion * 0.4) + sin(aRandom * 20.0 + uTime) * uDistortion * 0.5;
+        
+        // Add chaotic displacement
+        pos += normal * uDistortion * sin(uTime * 3.0 + aRandom * 10.0) * 0.3;
+      }
     } else {
       // === STEM & LEAVES ===
       float bendFactor = (pos.y + 6.0) / 6.0;
@@ -85,6 +107,18 @@ const vertexShader = `
       pos.z += windZ;
       if (aType > 1.5) {
          pos += aDirection * sin(uTime * 0.8 + pos.y) * 0.02;
+      }
+      
+      // === STEM/LEAF DISTORTION ===
+      if (uDistortion > 0.01) {
+        float stemDistort = uDistortion * (1.0 + bendFactor);
+        pos.x += sin(pos.y * 2.0 + uTime * 2.0) * stemDistort * 0.5;
+        pos.z += cos(pos.y * 2.0 + uTime * 2.0 + aRandom * 3.14) * stemDistort * 0.5;
+        
+        // Scatter leaves more
+        if (aType > 1.5) {
+          pos += aDirection * uDistortion * 0.8;
+        }
       }
     }
 
@@ -155,6 +189,7 @@ const fragmentShader = `
   varying float vProgress;
 
   uniform vec3 uColor;
+  uniform float uDistortion;
 
   void main() {
     vec2 coord = gl_PointCoord - vec2(0.5);
@@ -193,6 +228,15 @@ const fragmentShader = `
     
     finalColor = mix(finalColor, hotColor, heat);
     alpha = mix(alpha, 1.0, heat * 0.8);
+    
+    // === DISTORTION GLOW EFFECT ===
+    if (uDistortion > 0.01) {
+      // Add ethereal glow during distortion
+      vec3 distortGlow = vec3(0.8, 0.4, 1.0) * uDistortion * 2.0;
+      finalColor += distortGlow;
+      // Increase transparency slightly for ghostly effect
+      alpha *= (1.0 - uDistortion * 0.3);
+    }
 
     alpha = pow(alpha, 1.5);
     gl_FragColor = vec4(finalColor, alpha);
@@ -325,7 +369,7 @@ const ConstructionZone: React.FC<{ growthRef?: React.MutableRefObject<number> }>
   );
 };
 
-export const Rose: React.FC<RoseProps> = ({ config, growthRef }) => {
+export const Rose: React.FC<RoseProps> = ({ config, growthRef, distortionRef }) => {
   const pointsRef = useRef<THREE.Points>(null);
   
   const geometry = useMemo(() => {
@@ -420,6 +464,7 @@ export const Rose: React.FC<RoseProps> = ({ config, growthRef }) => {
       uDetail: { value: config.detail },
       uParticleSize: { value: config.particleSize },
       uScanY: { value: 10.0 }, // Start at Top
+      uDistortion: { value: 0.0 }, // Distortion amount (0-1)
     }),
     []
   );
@@ -439,6 +484,11 @@ export const Rose: React.FC<RoseProps> = ({ config, growthRef }) => {
           // Map growth 0->1 to Scan Y 10->-12
           const scanY = THREE.MathUtils.lerp(10.0, -12.0, growthRef.current);
           material.uniforms.uScanY.value = scanY;
+      }
+      
+      // Update distortion from pinch gesture
+      if (distortionRef) {
+          material.uniforms.uDistortion.value = distortionRef.current;
       }
     }
   });
