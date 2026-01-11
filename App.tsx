@@ -300,8 +300,8 @@ const App: React.FC = () => {
                </p>
                
                <div className="flex flex-col gap-1 mt-2 border-r border-white/20 pr-2">
-                   <p className={isPinching ? 'text-white font-bold' : 'text-gray-500'}>1. PINCH R-HAND: BUILD</p>
-                   <p className={isDistorting ? 'text-yellow-400 font-bold' : 'text-gray-500'}>2. PINCH L-HAND: DISTORT</p>
+                   <p className={isPinching ? 'text-white font-bold' : 'text-gray-500'}>1. PINCH PRIMARY: BUILD</p>
+                   <p className={isDistorting ? 'text-yellow-400 font-bold' : 'text-gray-500'}>2. PINCH SECONDARY: DISTORT</p>
                    <p className={!isPinching ? 'text-cyan-400 font-bold' : 'text-gray-500'}>3. RELEASE: AUTO-SNAP</p>
                </div>
              </div>
