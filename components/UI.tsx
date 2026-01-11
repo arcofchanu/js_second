@@ -10,7 +10,7 @@ export const UI: React.FC<UIProps> = ({ config, onConfigChange }) => {
   return (
     <div className="bg-black/60 backdrop-blur-md border border-white/10 p-6 rounded-2xl w-full max-w-sm text-sm shadow-2xl">
       <h1 className="text-2xl font-light mb-1 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">
-        Particle Rose
+      
       </h1>
       <p className="text-white/50 mb-6 text-xs">Procedural Point Cloud System</p>
 
