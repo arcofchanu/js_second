@@ -1,20 +1,105 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+
+
+# 🌸 DIGITAL FLORA
+
+**Interactive 3D Particle Flower with Hand Gesture Control**
+
 </div>
 
-# Run and deploy your AI Studio app
+---
 
-This contains everything you need to run your app locally.
+## ✨ Features
 
-View your app in AI Studio: https://ai.studio/apps/temp/3
+### 🎨 3D Particle Rose/Tulip
+- **190,000+ particles** forming a beautiful procedural flower
+- Flower head, stem, and leaves all rendered as point clouds
+- Custom GLSL shaders with tulip-style petal displacement
+- Additive blending for ethereal glow effect
 
-## Run Locally
+### 🔨 Laser Construction Effect
+- Particles "materialize" from corner laser beams
+- Top-to-bottom scanning construction animation
+- Hot pink sintering flash as particles arrive
+- 8 tracking beams from cube corners
 
-**Prerequisites:**  Node.js
+### ✋ Hand Gesture Controls (MediaPipe)
 
+| Gesture | Hand | Effect |
+|---------|------|--------|
+| **Pinch & Drag** | Right (Primary) | Control flower construction - drag up/down to build/unbuild |
+| **Pinch** | Left (Secondary) | **Distort the flower** with wild chaotic effects |
+| **Release** | Either | Smooth auto-snap to nearest state |
+
+### 🌀 Distortion Effect
+When pinching with your second hand:
+- **Spiral twist** - Intense 4x rotation with random variation
+- **Particle explosion** - 3x outward scatter
+- **Vertical chaos** - Wild up/down displacement
+- **Multi-color glow** - Hot pink, cyan, and gold glitch effect
+- **Flickering alpha** - Glitchy transparency
+
+## 🚀 Run Locally
+
+**Prerequisites:** Node.js, Webcam
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
+
+2. Run the app:
+   ```bash
+   npm run dev
+   ```
+
+3. Allow camera access when prompted
+
+## 🎮 Controls
+
+- **Right Hand Pinch + Drag Up/Down**: Build or deconstruct the flower
+- **Left Hand Pinch**: Distort and scatter the flower particles
+- **Release Pinch**: Flower smoothly returns to normal
+
+## 🛠️ Tech Stack
+
+- **React** + **TypeScript**
+- **Three.js** + **React Three Fiber**
+- **Custom GLSL Shaders**
+- **MediaPipe Hand Landmarker**
+- **Vite** for bundling
+- **Tailwind CSS** for UI
+
+## 📁 Project Structure
+
+```
+├── App.tsx              # Main app with hand tracking logic
+├── components/
+│   ├── Rose.tsx         # 3D particle flower with shaders
+│   ├── RoseExperience.tsx # Three.js canvas setup
+│   └── UI.tsx           # UI components
+├── types.ts             # TypeScript interfaces
+└── index.tsx            # Entry point
+```
+
+## 🎨 Configuration
+
+Edit `CINEMATIC_CONFIG` in `App.tsx`:
+
+```typescript
+{
+  color: '#7c00ff',      // Flower color
+  petalCount: 3.0,       // Number of petals
+  twist: 0.8,            // Petal twist amount
+  openness: 0.6,         // Bloom openness
+  detail: 0.5,           // Surface noise detail
+  speed: 0.15,           // Animation speed
+  particleSize: 0.022,   // Particle size
+}
+```
+
+---
+
+<div align="center">
+Made with 💜 using Three.js and MediaPipe
+</div>
