@@ -35,8 +35,8 @@ const App: React.FC = () => {
   
   // Growth state
   const growthRef = useRef<number>(0); 
-  // Distortion state (NDC Coordinates: -1 to 1)
-  const distortionRef = useRef<{x: number, y: number, active: boolean}>({ x: 0, y: 0, active: false });
+  // Distortion state (0 = normal, 1 = fully distorted)
+  const distortionRef = useRef<number>(0);
   
   const lastVideoTimeRef = useRef<number>(-1);
   const requestRef = useRef<number>(0);
@@ -207,21 +207,15 @@ const App: React.FC = () => {
                 const pinching = dist < 0.06;
                 setIsDistorting(pinching);
 
-                // Calculate Cursor Position (Midpoint)
-                const midX = (thumb.x + index.x) / 2;
-                const midY = (thumb.y + index.y) / 2;
-
-                // Update Distortion Ref (NDC Coordinates)
-                distortionRef.current = {
-                    x: 1 - 2 * midX,
-                    y: 1 - 2 * midY, // Invert Y for NDC (Up is +1)
-                    active: pinching
-                };
+                // Update Distortion Ref - smooth lerp to target
+                const targetDistortion = pinching ? 1.0 : 0.0;
+                distortionRef.current += (targetDistortion - distortionRef.current) * 0.1;
 
                 if (ctx) drawHand(ctx, landmarks, pinching, 0, true);
             } else {
                 setIsDistorting(false);
-                distortionRef.current.active = false;
+                // Smoothly return to normal when hand is gone
+                distortionRef.current += (0.0 - distortionRef.current) * 0.1;
             }
           }
         } catch (e) {
@@ -280,7 +274,7 @@ const App: React.FC = () => {
       {/* Main Title Overlay */}
       <div className="absolute top-8 left-8 z-10 pointer-events-none select-none">
         <h1 className="text-4xl font-light tracking-[0.2em] text-white/90 drop-shadow-lg">
-       
+          DIGITAL FLORA
         </h1>
         <div className="flex items-center gap-3 mt-2">
             <div className={`h-[1px] transition-all duration-300 ${isPinching ? 'w-24 bg-pink-500 shadow-[0_0_15px_#ec4899]' : 'w-12 bg-cyan-500'}`}></div>
